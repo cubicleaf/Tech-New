@@ -3,6 +3,64 @@ date: 2026-04-27
 day: Monday
 generated: 2026-04-27T06:30:00-04:00
 story_count: 5
+sources:
+  - group: "1 · Mythos 5 / Project Glasswing"
+    why: "First lab-confirmed frontier model with documented autonomous exploit capability withheld from public release — most consequential AI safety event of the past month and not covered in prior briefs."
+    links:
+      - title: "Claude Mythos Preview (Anthropic red team findings)"
+        url: "https://red.anthropic.com/2026/mythos-preview/"
+      - title: "Anthropic's Project Glasswing — restricting Claude Mythos to security researchers"
+        url: "https://simonwillison.net/2026/Apr/7/project-glasswing/"
+      - title: "Claude Mythos Preview Changes Cyber Calculus (Foreign Policy)"
+        url: "https://foreignpolicy.com/2026/04/20/claude-mythos-preview-anthropic-project-glasswing-cybersecurity-ai-hacking-danger/"
+      - title: "Anthropic giving firms access to Claude Mythos to bolster cybersecurity defenses (Fortune)"
+        url: "https://fortune.com/2026/04/07/anthropic-claude-mythos-model-project-glasswing-cybersecurity/"
+  - group: "2 · SpaceX IPO S-1"
+    why: "Only non-AI tech story strong enough for the top 5 this cycle; $1.75T target makes it the largest IPO setup in history and the first time Musk's space and AI infrastructure are priced as a single entity."
+    links:
+      - title: "SpaceX confidentially files for IPO (CNBC, April 1)"
+        url: "https://www.cnbc.com/2026/04/01/spacex-confidentially-files-for-ipo-setting-stage-for-record-offering.html"
+      - title: "SpaceX S-1 filing sets stage for largest IPO in history (New Space Economy)"
+        url: "https://newspaceeconomy.ca/2026/04/23/spacex-s-1-filing-sets-stage-for-largest-ipo-in-history/"
+      - title: "SpaceX IPO timeline — every important date (Motley Fool)"
+        url: "https://www.fool.com/investing/2026/04/27/spacex-ipo-timeline-every-important-date-need-know/"
+  - group: "3 · Mag-7 earnings preview"
+    why: "The $700B combined AI capex figure and analyst FCF projections (Meta –90%, Amazon –$17B) make Wednesday's calls the single most consequential event this week for the AI investment narrative."
+    links:
+      - title: "Tech AI spending approaches $700 billion in 2026 (CNBC)"
+        url: "https://www.cnbc.com/2026/02/06/google-microsoft-meta-amazon-ai-cash.html"
+      - title: "Earnings week ahead: MSFT, AAPL, GOOG, AMZN, META and more (Seeking Alpha)"
+        url: "https://seekingalpha.com/news/4579372-earnings-week-ahead-msft-aapl-goog-amzn-meta-xom-cvx-ko-v-sbux-f-gm-and-more"
+      - title: "Mag-7 earnings bonanza — what to watch this week (Yahoo Finance)"
+        url: "https://finance.yahoo.com/news/mag-7-earnings-bonanza-and-powells-home-stretch-what-to-watch-this-week-113016596.html"
+  - group: "4 · Stanford AI Index 2026"
+    why: "Selected for the talent-drain data (80% drop in researchers moving to U.S. last year) and the transparency score decline — both are underreported relative to the benchmark progress numbers that dominate AI coverage."
+    links:
+      - title: "The 2026 AI Index Report (Stanford HAI)"
+        url: "https://hai.stanford.edu/ai-index/2026-ai-index-report"
+      - title: "Stanford AI Index 2026 reveals a field racing ahead of its guardrails (Unite.AI)"
+        url: "https://www.unite.ai/stanford-ai-index-2026-reveals-a-field-racing-ahead-of-its-guardrails/"
+      - title: "Stanford's AI Index for 2026 shows the state of AI (IEEE Spectrum)"
+        url: "https://spectrum.ieee.org/state-of-ai-index-2026"
+  - group: "5 · DeepSeek V4 on Huawei Ascend 950"
+    why: "Distinct angle from prior brief coverage (which focused on open-weight benchmarks); the Huawei Supernode deployment is the first production-scale frontier inference outside U.S.-controlled silicon, which qualitatively changes the export-control calculus."
+    links:
+      - title: "DeepSeek unveils newest flagship a year after upending Silicon Valley (Bloomberg)"
+        url: "https://www.bloomberg.com/news/articles/2026-04-24/deepseek-unveils-newest-flagship-a-year-after-ai-breakthrough"
+      - title: "China's AI upstart DeepSeek drops new model (CNN)"
+        url: "https://www.cnn.com/2026/04/24/tech/chinas-ai-deepseek-v4-intl-hnk"
+      - title: "DeepSeek unveils latest models a year after upending global tech (Al Jazeera)"
+        url: "https://www.aljazeera.com/economy/2026/4/24/chinas-deepseek-unveils-latest-model-a-year-after-upending-global-tech"
+  - group: "Under the radar · Sakana AI Scientist v2"
+    why: "First confirmed AI-generated paper through peer review — a process milestone that matters more than any single model benchmark."
+    links:
+      - title: "AI Daily Update April 25, 2026 — Sakana AI Scientist v2 (Medium)"
+        url: "https://medium.com/@stephen.stanley777/ai-daily-update-april-25-2026-bd7544cc2758"
+  - group: "Under the radar · NVIDIA Ising quantum models"
+    why: "Niche but notable: first open AI models targeting the quantum optimization layer; included because the brief tracks hardware and compute infrastructure."
+    links:
+      - title: "NVIDIA launches Ising — first open AI models to accelerate quantum computers (NVIDIA Newsroom)"
+        url: "https://nvidianews.nvidia.com/news/nvidia-launches-ising-the-worlds-first-open-ai-models-to-accelerate-the-path-to-useful-quantum-computers"
 ---
 
 # Tech Brief

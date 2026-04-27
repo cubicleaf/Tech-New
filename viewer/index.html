@@ -379,6 +379,176 @@
       margin-bottom: 0.5rem;
       line-height: 1.55;
     }
+
+    /* ---------- Sources button (mirrors archive-btn on left side) ---------- */
+    .sources-btn {
+      position: absolute;
+      top: 0;
+      left: 0;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0.5rem 0.9rem;
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      color: var(--ink-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition:
+        transform 150ms var(--ease),
+        background 150ms var(--ease),
+        color 150ms var(--ease),
+        border-color 150ms var(--ease);
+    }
+    .sources-btn:hover {
+      background: rgba(139, 58, 31, 0.06);
+      color: var(--ink);
+      border-color: var(--ink-muted);
+    }
+    .sources-btn:active {
+      transform: scale(0.95);
+      transition: none;
+    }
+    .sources-btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ---------- Sources modal overlay ---------- */
+    .sources-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 36, 22, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s var(--ease);
+    }
+    .sources-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sources-modal {
+      background: var(--bg);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(44, 36, 22, 0.18);
+      max-width: 560px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(10px) scale(0.97);
+      transition: transform 0.2s var(--ease);
+    }
+    .sources-overlay.open .sources-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .sources-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem 1rem;
+      border-bottom: 1px solid var(--rule);
+      flex-shrink: 0;
+    }
+    .sources-modal-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .sources-modal-close {
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      color: var(--ink-soft);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.65rem;
+      transition: color 150ms, border-color 150ms, background 150ms;
+    }
+    .sources-modal-close:hover {
+      color: var(--ink);
+      border-color: var(--ink-muted);
+      background: rgba(139, 58, 31, 0.04);
+    }
+    .sources-modal-close:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .sources-modal-body {
+      overflow-y: auto;
+      padding: 1.25rem 1.5rem 1.75rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .source-group {
+      margin-bottom: 1.75rem;
+    }
+    .source-group:last-child { margin-bottom: 0; }
+
+    .source-group-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+    .source-group-why {
+      font-family: 'Literata', Georgia, serif;
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--ink-muted);
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .source-item {
+      padding: 0.45rem 0 0.45rem 0.85rem;
+      border-left: 2px solid var(--rule-soft);
+      margin-bottom: 0.45rem;
+    }
+    .source-item:last-child { margin-bottom: 0; }
+
+    .source-link {
+      display: block;
+      font-family: 'Literata', Georgia, serif;
+      font-size: 0.88rem;
+      color: var(--ink);
+      text-decoration: none;
+      line-height: 1.45;
+      border-bottom: 1px solid transparent;
+      transition: color 150ms, border-color 150ms;
+    }
+    .source-link:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .source-domain {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      color: var(--ink-soft);
+      margin-top: 0.15rem;
+      letter-spacing: 0.04em;
+    }
   </style>
 </head>
 <body>
@@ -386,9 +556,21 @@
     <h1 class="masthead-title">The Morning Brief</h1>
     <div class="masthead-date" id="masthead-date">Loading&hellip;</div>
     <div class="stale-banner" id="stale-banner" style="display:none;"></div>
+    <button class="sources-btn" id="sources-btn" style="display:none;" aria-haspopup="dialog">Sources</button>
     <button class="archive-btn" id="archive-btn" aria-expanded="false" aria-haspopup="menu">Archive</button>
     <div class="archive-panel" id="archive-panel" role="menu"></div>
   </header>
+
+  <!-- Sources modal -->
+  <div class="sources-overlay" id="sources-overlay" role="dialog" aria-modal="true" aria-labelledby="sources-modal-title">
+    <div class="sources-modal">
+      <div class="sources-modal-header">
+        <span class="sources-modal-title" id="sources-modal-title">Sources</span>
+        <button class="sources-modal-close" id="sources-modal-close" aria-label="Close sources">Close</button>
+      </div>
+      <div class="sources-modal-body" id="sources-modal-body"></div>
+    </div>
+  </div>
 
   <main id="content">
     <div class="loading">Loading&hellip;</div>
@@ -468,6 +650,7 @@
 
         renderMasthead(frontmatter);
         renderContent(body);
+        renderSources(frontmatter.sources || null);
         checkStale(frontmatter);
       } catch (err) {
         console.error('Brief fetch failed:', err);
@@ -586,6 +769,67 @@
     }
 
     /* =====================================================================
+       SOURCES MODAL
+       ===================================================================== */
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function parseDomain(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; }
+    }
+
+    function renderSources(sources) {
+      const btn = document.getElementById('sources-btn');
+      const body = document.getElementById('sources-modal-body');
+      if (!sources || !sources.length) {
+        btn.style.display = 'none';
+        body.innerHTML = '';
+        return;
+      }
+      btn.style.display = '';
+      body.innerHTML = sources.map(group => {
+        const links = (group.links || []).map(link =>
+          `<div class="source-item">
+            <a class="source-link" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.title)}</a>
+            <div class="source-domain">${escapeHtml(parseDomain(link.url))}</div>
+          </div>`
+        ).join('');
+        return `<div class="source-group">
+          <div class="source-group-label">${escapeHtml(group.group || '')}</div>
+          ${group.why ? `<div class="source-group-why">${escapeHtml(group.why)}</div>` : ''}
+          ${links}
+        </div>`;
+      }).join('');
+    }
+
+    function openSources() {
+      const overlay = document.getElementById('sources-overlay');
+      overlay.classList.add('open');
+      document.getElementById('sources-modal-close').focus();
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSources() {
+      const overlay = document.getElementById('sources-overlay');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      document.getElementById('sources-btn').focus();
+    }
+
+    document.getElementById('sources-btn').addEventListener('click', openSources);
+    document.getElementById('sources-modal-close').addEventListener('click', closeSources);
+
+    document.getElementById('sources-overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('sources-overlay')) closeSources();
+    });
+
+    /* =====================================================================
        ARCHIVE
        ===================================================================== */
     let archiveLoaded = false;
@@ -675,7 +919,12 @@
     });
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') togglePanel(false);
+      if (e.key !== 'Escape') return;
+      if (document.getElementById('sources-overlay').classList.contains('open')) {
+        closeSources();
+      } else {
+        togglePanel(false);
+      }
     });
 
     window.addEventListener('popstate', () => {
