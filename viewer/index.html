@@ -276,6 +276,29 @@
       letter-spacing: 0.05em;
     }
 
+    /* ---------- Glance items: clickable ---------- */
+    #content h2.glance-heading + ol li.glance-link {
+      cursor: pointer;
+      transition: color 150ms var(--ease), opacity 150ms var(--ease);
+    }
+    #content h2.glance-heading + ol li.glance-link:hover { color: var(--accent); }
+    #content h2.glance-heading + ol li.glance-link:active { opacity: 0.6; }
+
+    /* ---------- Story block wrapper (scroll target + glow) ---------- */
+    .story-block {
+      border-radius: 6px;
+      scroll-margin-top: 1.5rem;
+    }
+
+    @keyframes story-glow-kf {
+      0%   { box-shadow: 0 0 0 0px rgba(139, 58, 31, 0); }
+      18%  { box-shadow: 0 0 0 2px rgba(139, 58, 31, 0.4), 0 0 28px rgba(139, 58, 31, 0.13); }
+      100% { box-shadow: 0 0 0 0px rgba(139, 58, 31, 0); }
+    }
+    .story-block.story-glow {
+      animation: story-glow-kf 1.8s var(--ease-bloom) forwards;
+    }
+
     /* ---------- Horizontal rule after "At a glance" ---------- */
     #content hr {
       border: none;
@@ -700,6 +723,43 @@
       const content = document.getElementById('content');
       content.innerHTML = html;
       tagStructure(content);
+      wrapStories(content);
+      wireGlanceLinks(content);
+    }
+
+    function wrapStories(root) {
+      Array.from(root.querySelectorAll('h2.story-heading')).forEach((h2, idx) => {
+        const elements = [h2];
+        let next = h2.nextElementSibling;
+        while (next && next.tagName !== 'H2' && next.tagName !== 'HR') {
+          elements.push(next);
+          next = next.nextElementSibling;
+        }
+        const wrap = document.createElement('div');
+        wrap.className = 'story-block';
+        wrap.id = `story-${idx + 1}`;
+        h2.parentNode.insertBefore(wrap, h2);
+        elements.forEach(el => wrap.appendChild(el));
+      });
+    }
+
+    function wireGlanceLinks(root) {
+      const list = root.querySelector('h2.glance-heading + ol');
+      if (!list) return;
+      list.querySelectorAll('li').forEach((li, idx) => {
+        li.classList.add('glance-link');
+        li.addEventListener('click', () => scrollToStory(idx + 1));
+      });
+    }
+
+    function scrollToStory(num) {
+      const block = document.getElementById(`story-${num}`);
+      if (!block) return;
+      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      block.classList.remove('story-glow');
+      void block.offsetWidth;
+      block.classList.add('story-glow');
+      block.addEventListener('animationend', () => block.classList.remove('story-glow'), { once: true });
     }
 
     /* =====================================================================
