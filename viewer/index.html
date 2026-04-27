@@ -884,9 +884,13 @@
     }
 
     function selectArchiveItem(item, btn) {
-      const url = new URL(window.location);
-      url.searchParams.set('date', item.date);
-      history.pushState({ date: item.date }, '', url);
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('date', item.date);
+        history.pushState({ date: item.date }, '', url);
+      } catch (e) {
+        // pushState can throw on file:// — ignore and still load the brief
+      }
 
       document.querySelectorAll('.archive-item').forEach(el => el.classList.remove('current'));
       btn.classList.add('current');
