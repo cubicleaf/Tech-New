@@ -1,0 +1,11 @@
+# Netlify config — must live at the repo root so Netlify can find it.
+#
+# publish = "viewer" tells Netlify to serve viewer/index.html as the site root.
+#
+# The ignore command skips rebuilds when only briefs/ changed (daily brief
+# commits), preserving free-tier deploy quota. A rebuild only fires when
+# viewer/ itself changes.
+
+[build]
+  publish = "viewer"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- viewer/"
