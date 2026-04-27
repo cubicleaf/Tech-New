@@ -840,82 +840,65 @@
     });
 
     /* =====================================================================
-       ARCHIVE
+       ARCHIVE — stateless rewrite
+       No pushState, no URL params, no popstate. State lives in memory only.
        ===================================================================== */
-    let archiveLoaded = false;
+
+    const archiveState = { loaded: false, items: [], currentDate: null };
 
     async function loadArchive() {
-      if (archiveLoaded) return;
+      if (archiveState.loaded) { renderArchive(); return; }
       try {
         const res = await fetch(`${REPO_RAW_BASE}/index.json${cb()}`);
         if (!res.ok) throw new Error(`index fetch failed: ${res.status}`);
-        const items = await res.json();
-        renderArchive(items);
-        archiveLoaded = true;
+        archiveState.items = await res.json();
+        archiveState.loaded = true;
+        renderArchive();
       } catch (err) {
         console.error('Archive fetch failed:', err);
-        renderArchiveError();
+        document.getElementById('archive-panel').innerHTML =
+          '<div class="archive-empty">Archive unavailable</div>';
       }
     }
 
-    function renderArchive(items) {
+    function renderArchive() {
       const panel = document.getElementById('archive-panel');
       panel.innerHTML = '';
+      const items = archiveState.items;
       if (!Array.isArray(items) || items.length === 0) {
         panel.innerHTML = '<div class="archive-empty">No briefs yet.</div>';
         return;
       }
-      const currentDate = new URLSearchParams(window.location.search).get('date');
       items.forEach((item, idx) => {
         const btn = document.createElement('button');
         btn.className = 'archive-item';
         btn.setAttribute('role', 'menuitem');
         btn.dataset.date = item.date;
-        btn.dataset.file = item.file;
         btn.innerHTML =
           `<div class="date">${formatDateLong(item.date)}</div>` +
           `<div class="day">${item.day}</div>`;
-        if (currentDate === item.date || (!currentDate && idx === 0)) {
-          btn.classList.add('current');
-        }
-        btn.addEventListener('click', () => selectArchiveItem(item, btn));
+        const isCurrent = archiveState.currentDate
+          ? item.date === archiveState.currentDate
+          : idx === 0;
+        if (isCurrent) btn.classList.add('current');
+        btn.addEventListener('click', () => navigateTo(item.date));
         panel.appendChild(btn);
       });
     }
 
-    function renderArchiveError() {
-      const panel = document.getElementById('archive-panel');
-      panel.innerHTML = '<div class="archive-empty">Archive unavailable</div>';
-    }
-
-    function selectArchiveItem(item, btn) {
-      try {
-        const url = new URL(window.location.href);
-        url.searchParams.set('date', item.date);
-        history.pushState({ date: item.date }, '', url);
-      } catch (e) {
-        // pushState can throw on file:// — ignore and still load the brief
-      }
-
-      document.querySelectorAll('.archive-item').forEach(el => el.classList.remove('current'));
-      btn.classList.add('current');
-
+    function navigateTo(date) {
+      archiveState.currentDate = date;
       togglePanel(false);
-
       document.getElementById('content').innerHTML = '<div class="loading">Loading&hellip;</div>';
-      loadBrief(item.date);
+      loadBrief(date);
     }
-
-    /* =====================================================================
-       PANEL TOGGLE + OUTSIDE CLICK + BACK/FORWARD
-       ===================================================================== */
 
     function togglePanel(force) {
       const panel = document.getElementById('archive-panel');
-      const btn = document.getElementById('archive-btn');
+      const archiveBtn = document.getElementById('archive-btn');
       const shouldOpen = typeof force === 'boolean' ? force : !panel.classList.contains('open');
       panel.classList.toggle('open', shouldOpen);
-      btn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+      archiveBtn.setAttribute('aria-expanded', String(shouldOpen));
       if (shouldOpen) loadArchive();
     }
 
@@ -926,8 +909,8 @@
 
     document.addEventListener('click', e => {
       const panel = document.getElementById('archive-panel');
-      const btn = document.getElementById('archive-btn');
-      if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+      const archiveBtn = document.getElementById('archive-btn');
+      if (!panel.contains(e.target) && !archiveBtn.contains(e.target)) {
         togglePanel(false);
       }
     });
@@ -941,20 +924,10 @@
       }
     });
 
-    window.addEventListener('popstate', () => {
-      const dateParam = new URLSearchParams(window.location.search).get('date');
-      document.getElementById('content').innerHTML = '<div class="loading">Loading&hellip;</div>';
-      loadBrief(dateParam);
-      document.querySelectorAll('.archive-item').forEach(el => {
-        el.classList.toggle('current', el.dataset.date === (dateParam || el.dataset.date === null));
-      });
-    });
-
     /* =====================================================================
        INIT
        ===================================================================== */
-    const initialDate = new URLSearchParams(window.location.search).get('date');
-    loadBrief(initialDate);
+    loadBrief(null);
   </script>
 </body>
 </html>
