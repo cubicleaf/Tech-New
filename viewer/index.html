@@ -684,7 +684,7 @@
         renderMasthead(frontmatter);
         renderContent(body);
         renderSources(frontmatter.sources || null);
-        checkStale(frontmatter);
+        checkStale(frontmatter, !dateParam);
       } catch (err) {
         console.error('Brief fetch failed:', err);
         const detail = err && err.message ? err.message : String(err);
@@ -706,9 +706,9 @@
       document.getElementById('masthead-date').textContent = `${day} \u00B7 ${formatted}`;
     }
 
-    function checkStale(fm) {
+    function checkStale(fm, isLatest) {
       const banner = document.getElementById('stale-banner');
-      if (!fm.date) { banner.style.display = 'none'; return; }
+      if (!isLatest || !fm.date) { banner.style.display = 'none'; return; }
       if (fm.date < todayInEastern()) {
         const day = fm.day || dayOfWeek(fm.date);
         banner.textContent = `Last brief \u00B7 ${day} \u00B7 ${formatDateLong(fm.date)}`;
