@@ -428,12 +428,16 @@
       z-index: 100;
       padding: 1rem;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      transition: opacity 0.2s var(--ease);
+      /* visibility delay matches opacity so element hides only after fade-out completes */
+      transition: opacity 0.2s var(--ease), visibility 0s 0.2s;
     }
     .sources-overlay.open {
       opacity: 1;
+      visibility: visible;
       pointer-events: auto;
+      transition: opacity 0.2s var(--ease), visibility 0s;
     }
 
     .sources-modal {
@@ -659,8 +663,9 @@
         checkStale(frontmatter);
       } catch (err) {
         console.error('Brief fetch failed:', err);
+        const detail = err && err.message ? err.message : String(err);
         document.getElementById('content').innerHTML =
-          '<div class="error-message">No brief available yet. Check back at 6:30 AM Eastern.</div>';
+          `<div class="error-message">No brief available yet. Check back at 6:30 AM Eastern.<br><small style="opacity:0.6;font-size:0.75rem">${detail}</small></div>`;
         document.getElementById('masthead-date').textContent = '';
         document.getElementById('stale-banner').style.display = 'none';
       }
