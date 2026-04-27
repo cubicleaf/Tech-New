@@ -212,6 +212,70 @@
       font-style: italic;
     }
 
+    /* ---------- Read checkbox (bottom of each brief) ----------
+       Squircle-shaped manual toggle. State is browser-local (localStorage)
+       and only changes when the user clicks. Sage-green check fades in
+       when checked. */
+    .read-checkbox-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      margin: 3rem auto 1rem;
+      user-select: none;
+    }
+    .read-checkbox {
+      width: 1.5rem;        /* 24px */
+      height: 1.5rem;
+      border: 2px solid var(--ink-soft);
+      border-radius: 6px;   /* squircle corners */
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 200ms var(--ease), border-color 200ms var(--ease);
+    }
+    .read-checkbox:hover { border-color: #8aa872; }
+    .read-checkbox:focus-visible {
+      outline: 2px solid #8aa872;
+      outline-offset: 2px;
+    }
+    .read-checkbox.checked {
+      background: rgba(138, 168, 114, 0.18);
+      border-color: #8aa872;
+    }
+    .read-checkmark {
+      width: 14px;
+      height: 14px;
+      opacity: 0;
+      transition: opacity 200ms var(--ease);
+    }
+    .read-checkbox.checked .read-checkmark { opacity: 1; }
+    .read-checkbox-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+
+    /* ---------- Read indicator (small sage check in masthead + archive) ---------- */
+    .read-indicator {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      color: #8aa872;       /* sage */
+    }
+    .read-indicator svg {
+      width: 12px;
+      height: 12px;
+    }
+    .masthead-date .read-indicator { margin-right: 0.5rem; }
+    .archive-item .date .read-indicator { margin-left: 0.4rem; }
+
     /* ---------- Content region (staggered entrance, 150ms delay) ---------- */
     #content {
       opacity: 0;
@@ -646,6 +710,54 @@
     }
 
     /* =====================================================================
+       READ-STATE STORAGE (localStorage, browser-local, manual only)
+       ---------------------------------------------------------------------
+       Read state is just a Set of brief-date strings the user has manually
+       marked as read. Persisted to localStorage under a single key. The
+       state never changes automatically — only the user toggles it.
+       ===================================================================== */
+    const READ_STORAGE_KEY = 'tech-brief-read';
+
+    function getReadSet() {
+      try {
+        const stored = localStorage.getItem(READ_STORAGE_KEY);
+        if (!stored) return new Set();
+        const arr = JSON.parse(stored);
+        return new Set(Array.isArray(arr) ? arr : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveReadSet(set) {
+      try {
+        localStorage.setItem(READ_STORAGE_KEY, JSON.stringify([...set]));
+      } catch {
+        // localStorage disabled or quota exceeded — fail silently.
+      }
+    }
+
+    function isRead(date) { return getReadSet().has(date); }
+
+    function toggleRead(date) {
+      const set = getReadSet();
+      if (set.has(date)) set.delete(date);
+      else set.add(date);
+      saveReadSet(set);
+      return set.has(date);
+    }
+
+    // Inline SVG for the small sage-green checkmark. Used in the masthead
+    // and archive items to indicate a brief has been marked read.
+    function checkmarkSvg() {
+      return '<span class="read-indicator" aria-label="Read">' +
+        '<svg viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">' +
+          '<path d="M2 7 L6 11 L12 4" stroke="currentColor" stroke-width="2.5" ' +
+          'fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg></span>';
+    }
+
+    /* =====================================================================
        FRONTMATTER PARSING
        ===================================================================== */
 
@@ -671,6 +783,10 @@
        BRIEF LOADING
        ===================================================================== */
 
+    // Tracks the most recently loaded brief's frontmatter so the read-state
+    // toggle can re-render the masthead with the updated indicator.
+    let currentBriefFm = null;
+
     async function loadBrief(dateParam) {
       const path = dateParam ? `${dateParam}.md` : 'latest.md';
       const url = `${REPO_RAW_BASE}/${path}${cb()}`;
@@ -681,17 +797,21 @@
         const raw = await res.text();
         const { frontmatter, body } = parseFrontmatter(raw);
 
+        currentBriefFm = frontmatter;
+
         renderMasthead(frontmatter);
         renderContent(body);
         renderSources(frontmatter.sources || null);
         checkStale(frontmatter, !dateParam);
+        renderReadCheckbox(frontmatter.date);
       } catch (err) {
         console.error('Brief fetch failed:', err);
         const detail = err && err.message ? err.message : String(err);
         document.getElementById('content').innerHTML =
-          `<div class="error-message">No brief available yet. Check back at 6:30 AM Eastern.<br><small style="opacity:0.6;font-size:0.75rem">${detail}</small></div>`;
+          `<div class="error-message">No brief available yet. Check back at 6:30 AM Eastern.<br><small style="opacity:0.6;font-size:0.75rem">${detail}</small></div>`;
         document.getElementById('masthead-date').textContent = '';
         document.getElementById('stale-banner').style.display = 'none';
+        currentBriefFm = null;
       }
     }
 
@@ -703,7 +823,11 @@
       }
       const day = (fm.day || dayOfWeek(date)).toUpperCase();
       const formatted = formatDateLong(date).toUpperCase();
-      document.getElementById('masthead-date').textContent = `${day} \u00B7 ${formatted}`;
+      // Read indicator (small sage check) sits to the LEFT of the day label.
+      const readIcon = isRead(date) ? checkmarkSvg() : '';
+      // innerHTML (not textContent) so the indicator span renders. Source
+      // values are computed in this file, not user-supplied — no XSS risk.
+      document.getElementById('masthead-date').innerHTML = `${readIcon}${day} · ${formatted}`;
     }
 
     function checkStale(fm, isLatest) {
@@ -711,7 +835,7 @@
       if (!isLatest || !fm.date) { banner.style.display = 'none'; return; }
       if (fm.date < todayInEastern()) {
         const day = fm.day || dayOfWeek(fm.date);
-        banner.textContent = `Last brief \u00B7 ${day} \u00B7 ${formatDateLong(fm.date)}`;
+        banner.textContent = `Last brief · ${day} · ${formatDateLong(fm.date)}`;
         banner.style.display = 'block';
       } else {
         banner.style.display = 'none';
@@ -725,6 +849,50 @@
       tagStructure(content);
       wrapStories(content);
       wireGlanceLinks(content);
+    }
+
+    // Appends a "Mark as read" squircle checkbox to the bottom of the
+    // brief content. Toggling it stores state in localStorage and updates
+    // the masthead and archive checkmark indicators in place.
+    function renderReadCheckbox(date) {
+      if (!date) return;
+      const content = document.getElementById('content');
+
+      // Defensive: drop any prior checkbox so we don't end up with duplicates
+      // when loadBrief is called again (e.g., archive click).
+      const existing = content.querySelector('.read-checkbox-row');
+      if (existing) existing.remove();
+
+      const checked = isRead(date);
+      const row = document.createElement('div');
+      row.className = 'read-checkbox-row';
+      row.innerHTML =
+        `<button class="read-checkbox ${checked ? 'checked' : ''}" ` +
+          `role="checkbox" aria-checked="${checked}" aria-label="Mark this brief as read">` +
+          `<svg class="read-checkmark" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg">` +
+            `<path d="M2 7 L6 11 L12 4" stroke="#8aa872" stroke-width="2.5" ` +
+            `fill="none" stroke-linecap="round" stroke-linejoin="round"/>` +
+          `</svg>` +
+        `</button>` +
+        `<span class="read-checkbox-label">Mark as read</span>`;
+
+      const checkbox = row.querySelector('.read-checkbox');
+      const label = row.querySelector('.read-checkbox-label');
+
+      const handler = () => {
+        const nowChecked = toggleRead(date);
+        checkbox.classList.toggle('checked', nowChecked);
+        checkbox.setAttribute('aria-checked', nowChecked ? 'true' : 'false');
+        // Re-render the masthead and any visible archive items so their
+        // small checkmark indicators reflect the new state immediately.
+        if (currentBriefFm) renderMasthead(currentBriefFm);
+        refreshArchiveReadIndicators();
+      };
+
+      checkbox.addEventListener('click', handler);
+      label.addEventListener('click', handler);
+
+      content.appendChild(row);
     }
 
     function wrapStories(root) {
@@ -935,8 +1103,10 @@
         btn.className = 'archive-item';
         btn.setAttribute('role', 'menuitem');
         btn.dataset.date = item.date;
+        // Read indicator (small sage check) sits to the RIGHT of the date.
+        const readIcon = isRead(item.date) ? checkmarkSvg() : '';
         btn.innerHTML =
-          `<div class="date">${formatDateLong(item.date)}</div>` +
+          `<div class="date">${formatDateLong(item.date)}${readIcon}</div>` +
           `<div class="day">${item.day}</div>`;
         const isCurrent = archiveState.currentDate
           ? item.date === archiveState.currentDate
@@ -945,6 +1115,12 @@
         btn.addEventListener('click', () => navigateTo(item.date));
         panel.appendChild(btn);
       });
+    }
+
+    // Re-render archive items so read-state checkmarks update immediately
+    // when the user toggles a brief from the bottom checkbox.
+    function refreshArchiveReadIndicators() {
+      if (archiveState.loaded) renderArchive();
     }
 
     function navigateTo(date) {
